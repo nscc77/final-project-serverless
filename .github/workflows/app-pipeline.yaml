@@ -52,6 +52,7 @@ jobs:
         run: npm ci
       # 4. Build the React app
       - name: Build App
+        working-directory: ./frontend 
         env:
           VITE_BACKEND_API_URL: ${{ secrets.VITE_BACKEND_API_URL }}
           VITE_USER_POOL_ID: ${{ secrets.VITE_USER_POOL_ID }}
