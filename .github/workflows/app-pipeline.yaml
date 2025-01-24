@@ -48,8 +48,8 @@ jobs:
 
       # 3. Install dependencies
       - name: Install Dependencies
+        working-directory: ./frontend      
         run: npm ci
-
       # 4. Build the React app
       - name: Build App
         env:
