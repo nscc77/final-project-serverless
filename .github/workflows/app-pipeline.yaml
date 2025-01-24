@@ -64,4 +64,4 @@ jobs:
       - name: Deploy to S3
         working-directory: ./frontend 
         run: |
-          aws s3 sync build/ s3://spectrex.click --delete
+          aws s3 sync dist/ s3://spectrex.click --delete
