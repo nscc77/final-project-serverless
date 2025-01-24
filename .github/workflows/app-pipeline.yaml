@@ -1,37 +1,53 @@
 name: Implement CI/CD pipeline with a NodeJS app
 
-# trigger
+# Triggers
 on:
   push:
     branches:
-    - 'main'
+      - 'main'
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+  workflow_dispatch:
+    inputs:
+      deploy_backend:
+        description: "Deploy Backend"
+        required: false
+        default: "true"
+      deploy_frontend:
+        description: "Deploy Frontend"
+        required: false
+        default: "true"
 
 permissions:
-  id-token: write # This is required for requesting the JWT
-  contents: read  # This is required for actions/checkout
+  id-token: write
+  contents: read
 
 jobs:
-  app-deploy:
+  deploy-backend:
+    if: ${{ github.event_name == 'push' || github.event.inputs.deploy_backend == 'true' }}
     environment: dev
-    # specify Runner details: Self-hosted or GitHub Runner
-    runs-on: "ubuntu-24.04"
+    runs-on: ubuntu-24.04
 
     steps:
-    # 1. Clone Repo
+      # 1. Clone Repo
       - name: Clone repo
         uses: actions/checkout@v4
-      # 2. Log to AWS
+
+      # 2. Configure AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
-      # 3. Loghin to ECR
+
+      # 3. Login to ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      # 4. Build Backend image
+
+      # 4. Build, Tag, and Push Backend Docker Image
       - name: Backend - Build, tag, and push docker image to Amazon ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -42,21 +58,38 @@ jobs:
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG   
 
-#############################################################################
+  deploy-frontend:
+    if: ${{ github.event_name == 'push' || github.event.inputs.deploy_frontend == 'true' }}
+    environment: dev
+    runs-on: ubuntu-24.04
 
-      # 5. Install NodeJs
+    steps:
+      # 1. Clone Repo
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      # 2. Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.IAM_ROLE }}
+          role-session-name: "${{ github.actor }}-${{ github.run_id }}"
+
+      # 3. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Use the version specified in your project
+          node-version: 18
 
-      # 6. Install dependencies
+      # 4. Install Dependencies
       - name: Install Dependencies
-        working-directory: ./frontend      
+        working-directory: ./frontend
         run: npm ci
-      # 7. Build the React app
+
+      # 5. Build App
       - name: Build App
-        working-directory: ./frontend 
+        working-directory: ./frontend
         env:
           VITE_BACKEND_API_URL: ${{ secrets.VITE_BACKEND_API_URL }}
           VITE_USER_POOL_ID: ${{ secrets.VITE_USER_POOL_ID }}
@@ -64,8 +97,8 @@ jobs:
           VITE_AWS_REGION: ${{ vars.AWS_REGION }}
         run: npm run build
 
-      # 7. Deploy to S3
+      # 6. Deploy to S3
       - name: Deploy to S3
-        working-directory: ./frontend 
+        working-directory: ./frontend
         run: |
           aws s3 sync dist/ s3://spectrex.click --delete
