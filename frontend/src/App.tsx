@@ -38,19 +38,27 @@ function App() {
 
   const { authStatus } = useAuthenticator((context) => [context.user]);
 
+  // Logout function to redirect to Cognito logout URL
+  const handleLogout = () => {
+    const logoutUrl = `https://${config.userPoolId}.auth.${config.awsRegion}.amazoncognito.com/logout?client_id=${config.userPoolClientId}&logout_uri=https://d84l1y8p4kdic.cloudfront.net/`;
+    window.location.href = logoutUrl;
+  };
+
   return (
     <>
-      {authStatus != 'authenticated' ? <Stats></Stats> : <></>}
+      {authStatus !== 'authenticated' ? <Stats></Stats> : <></>}
       <Authenticator>
-        {({ signOut, user }) => (
+        {({ user }) => (
           <>
             <AppBar position="static">
               <Toolbar>
                 <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
                   Write your memo
                 </Typography>
-                <Typography sx={{ paddingX: 2 }}>{user && user.attributes?.email == null ? '' : user?.attributes?.email}</Typography>
-                <Button color="inherit" onClick={signOut}>
+                <Typography sx={{ paddingX: 2 }}>
+                  {user && user.attributes?.email == null ? '' : user?.attributes?.email}
+                </Typography>
+                <Button color="inherit" onClick={handleLogout}>
                   Sign out
                 </Button>
               </Toolbar>
