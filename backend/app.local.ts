@@ -1,25 +1,29 @@
-process.env.TABLE_NAME = 'test';
-process.env.AWS_REGION = 'us-east-1';
-process.env.DYNAMODB_ENDPOINT = 'http://localhost:8000';
-process.env.JOB_QUEUE_NAME = 'dummy';
-
-import { client, TableName } from './common/dynamodb';
+import { client } from './common/dynamodb';
 import { CreateTableCommand, ResourceInUseException } from '@aws-sdk/client-dynamodb';
 import app from './apps/local';
 
-const port = 3001;
-
-// https://github.com/wclr/ts-node-dev/issues/120
-process.on('SIGTERM', (err: any) => {
-  process.exit(1);
-});
+const port = process.env.PORT || 3001; // Default to port 3001 if not provided
 
 const main = async () => {
+  const { TABLE_NAME, AWS_REGION, DYNAMODB_ENDPOINT } = process.env;
+
+  // Validate required environment variables
+  if (!TABLE_NAME || !AWS_REGION) {
+    console.error('Error: Missing required environment variables (TABLE_NAME, AWS_REGION).');
+    process.exit(1);
+  }
+
+  console.log(`Using Table: ${TABLE_NAME}`);
+  console.log(`Region: ${AWS_REGION}`);
+  if (DYNAMODB_ENDPOINT) {
+    console.log(`DynamoDB Endpoint: ${DYNAMODB_ENDPOINT} (local development)`);
+  }
+
   try {
-    // Initialize the main table
+    // Initialize the DynamoDB table
     await client.send(
       new CreateTableCommand({
-        TableName,
+        TableName: TABLE_NAME,
         AttributeDefinitions: [
           { AttributeName: 'PK', AttributeType: 'S' },
           { AttributeName: 'SK', AttributeType: 'S' },
@@ -28,24 +32,23 @@ const main = async () => {
           { AttributeName: 'PK', KeyType: 'HASH' },
           { AttributeName: 'SK', KeyType: 'RANGE' },
         ],
-        ProvisionedThroughput: {
-          ReadCapacityUnits: 5,
-          WriteCapacityUnits: 5,
-        },
+        BillingMode: 'PAY_PER_REQUEST', // Use on-demand billing for real AWS DynamoDB
       }),
     );
-    console.log('Successfully created a DynamoDB table.')
+    console.log('Successfully created a DynamoDB table.');
   } catch (e) {
     if (e instanceof ResourceInUseException) {
-      // the table is already created.
+      console.log('Table already exists.');
     } else {
-      console.log(`Failure in creating a DynamoDB table ${e}`);
+      console.error(`Error creating DynamoDB table: ${e.message}`);
     }
   }
 
+  // Start the application
   app.listen(port, () => {
-    console.log(`listening at http://localhost:${port}`);
+    console.log(`Listening at http://localhost:${port}`);
   });
 };
 
+// Run the main function
 main();

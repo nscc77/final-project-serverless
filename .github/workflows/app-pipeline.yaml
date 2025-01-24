@@ -17,22 +17,26 @@ jobs:
     runs-on: "ubuntu-24.04"
 
     steps:
+    # 1. Clone Repo
       - name: Clone repo
         uses: actions/checkout@v4
-
+      # 2. Log to AWS
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
-
+      # 3. Loghin to ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
+      # 4. Build Backend image
       - name: Backend - Build, tag, and push docker image to Amazon ECR
         env:
+          TABLE_NAME: ${{ TABLE_NAME }}
+          AWS_REGION: ${{ AWS_REGION }}
+          DYNAMODB_ENDPOINT: ${{ DYNAMODB_ENDPOINT }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: backend-app
           IMAGE_TAG: ${{ github.sha }}
@@ -41,16 +45,19 @@ jobs:
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG   
 
+#############################################################################
+
+      # 5. Install NodeJs
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18 # Use the version specified in your project
 
-      # 3. Install dependencies
+      # 6. Install dependencies
       - name: Install Dependencies
         working-directory: ./frontend      
         run: npm ci
-      # 4. Build the React app
+      # 7. Build the React app
       - name: Build App
         working-directory: ./frontend 
         env:
@@ -60,7 +67,7 @@ jobs:
           VITE_AWS_REGION: ${{ vars.AWS_REGION }}
         run: npm run build
 
-      # 5. Deploy to S3
+      # 7. Deploy to S3
       - name: Deploy to S3
         working-directory: ./frontend 
         run: |
