@@ -1,6 +1,5 @@
 name: Implement CI/CD pipeline with a NodeJS app
 
-# Triggers
 on:
   push:
     branches:
@@ -13,11 +12,11 @@ on:
       deploy_backend:
         description: "Deploy Backend"
         required: false
-        default: "true"
+        default: "false"
       deploy_frontend:
         description: "Deploy Frontend"
         required: false
-        default: "true"
+        default: "false"
 
 permissions:
   id-token: write
@@ -25,16 +24,14 @@ permissions:
 
 jobs:
   deploy-backend:
-    if: ${{ github.event_name == 'push' || github.event.inputs.deploy_backend == 'true' }}
+    if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[backend]') || github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_backend == 'true' }}
     environment: dev
     runs-on: ubuntu-24.04
 
     steps:
-      # 1. Clone Repo
       - name: Clone repo
         uses: actions/checkout@v4
 
-      # 2. Configure AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -42,13 +39,11 @@ jobs:
           role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      # 3. Login to ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Build, Tag, and Push Backend Docker Image
-      - name: Backend - Build, tag, and push docker image to Amazon ECR
+      - name: Build, tag, and push docker image to Amazon ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: backend-app
@@ -59,16 +54,14 @@ jobs:
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG   
 
   deploy-frontend:
-    if: ${{ github.event_name == 'push' || github.event.inputs.deploy_frontend == 'true' }}
+    if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[frontend]') || github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_frontend == 'true' }}
     environment: dev
     runs-on: ubuntu-24.04
 
     steps:
-      # 1. Clone Repo
       - name: Clone repo
         uses: actions/checkout@v4
 
-      # 2. Configure AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -76,18 +69,15 @@ jobs:
           role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      # 3. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 4. Install Dependencies
       - name: Install Dependencies
         working-directory: ./frontend
         run: npm ci
 
-      # 5. Build App
       - name: Build App
         working-directory: ./frontend
         env:
@@ -97,7 +87,6 @@ jobs:
           VITE_AWS_REGION: ${{ vars.AWS_REGION }}
         run: npm run build
 
-      # 6. Deploy to S3
       - name: Deploy to S3
         working-directory: ./frontend
         run: |
