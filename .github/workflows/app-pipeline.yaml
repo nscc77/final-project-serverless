@@ -91,9 +91,9 @@ jobs:
       - name: Build App
         working-directory: ./frontend
         env:
-          VITE_BACKEND_API_URL: ${{ secrets.VITE_BACKEND_API_URL }}
-          VITE_USER_POOL_ID: ${{ secrets.VITE_USER_POOL_ID }}
-          VITE_USER_POOL_CLIENT_ID: ${{ secrets.VITE_USER_POOL_CLIENT_ID }}
+          VITE_BACKEND_API_URL: ${{ vars.VITE_BACKEND_API_URL }}
+          VITE_USER_POOL_ID: ${{ vars.VITE_USER_POOL_ID }}
+          VITE_USER_POOL_CLIENT_ID: ${{ vars.VITE_USER_POOL_CLIENT_ID }}
           VITE_AWS_REGION: ${{ vars.AWS_REGION }}
         run: npm run build
 
