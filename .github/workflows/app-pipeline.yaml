@@ -53,6 +53,7 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: backend-app
           IMAGE_TAG: ${{ github.sha }}
+          TABLE_NAME: ${{ vars.TABLE_NAME }}
         working-directory: ./backend
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
