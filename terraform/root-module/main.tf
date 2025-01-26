@@ -2,11 +2,6 @@ module "s3-static-website" {
   source      = "../s3-module/"
   name_prefix = "sample-app-website"
 
-  providers = {
-    aws.main         = aws.main
-    aws.acm_provider = aws.acm_provider
-  }
-
   website_domain_name = "sample-app.com"
 
   create_acm_certificate = true
