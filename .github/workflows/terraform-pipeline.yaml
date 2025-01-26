@@ -1,0 +1,36 @@
+name: Deploy Terraform
+
+on:
+  push:
+    paths:
+      - 'terraform/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-22.04
+    environment: dev  
+    steps:
+      - name: Clone Repo
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.IAM_ROLE }}
+          role-session-name: "${{ github.actor }}-${{ github.run_id }}"
+
+      - name: Terraform Init and Apply
+        working-directory: ./terraform/root-module
+        env:
+          TF_VAR_IAM_USER: ${{vars.IAM_USER}}
+        run: |
+          terraform init
+          terraform validate
+          terraform plan -out=tfplan -input=false
+          terraform apply -auto-approve tfplan
