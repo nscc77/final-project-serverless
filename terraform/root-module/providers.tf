@@ -9,7 +9,7 @@ terraform {
 
   backend "s3" {
     bucket = "terraform-state-nscc77"
-    key    = "homework-project-nscc77.tfstate"
+    key    = "express-app.tfstate"
     region = "us-east-1"
     dynamodb_table = "terraform-lock-table"
   }
