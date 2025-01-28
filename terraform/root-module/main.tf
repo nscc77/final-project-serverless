@@ -21,7 +21,7 @@ module "lamda-module" {
   source = "../lamda-module"
 
   lambda_name        = "serverless24b-redhat-lambda"
-  image_uri          = "${var.AWS_ACCT_ID}.dkr.ecr.${var.AWS_REGION}.amazonaws.com/${module.ecr_repository.repository_name}:latest"
+  image_uri          = "021891586336.dkr.ecr.us-east-1.amazonaws.com/backend-app:86457a5885b3278ff9a60d5beaeb6aff301bf0c5"
   region             = "${var.AWS_REGION}"
   account_id         = "${var.AWS_ACCT_ID}"
   dynamodb_table_arn = module.dynamodb_table.table_arn
