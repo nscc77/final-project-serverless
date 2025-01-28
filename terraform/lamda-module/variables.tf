@@ -29,13 +29,13 @@ variable "paths" {
 }
 
 variable "methods" {
-  description = "Map of methods per path"
-  type = map(list(string))
+  description = "Map of paths to HTTP methods"
+  type = map(string)
 }
 
 variable "integration_methods" {
-  description = "Map of integration methods for Lambda integration"
-  type = map(list(string))
+  description = "Map of integration methods for Lambda"
+  type = map(string)
 }
 
 variable "api_resources" {
