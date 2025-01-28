@@ -124,6 +124,7 @@ module "static_website" {
   enable_versioning = true
   index_document    = "index.html"
   error_document    = ""
+  AWS_ACCT_ID = var.AWS_ACCT_ID
 
   tags = {
     Environment = "dev"
