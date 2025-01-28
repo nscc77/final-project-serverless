@@ -17,7 +17,7 @@ module "dynamodb_table" {
   }
 }
 
-module "serverless24b_redhat_lambda" {
+module "lambda-module" {
   source = "../lambda-module"
 
   lambda_name        = "serverless24b-redhat-lambda"
