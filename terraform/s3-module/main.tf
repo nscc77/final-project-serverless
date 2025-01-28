@@ -1,11 +1,6 @@
 resource "aws_s3_bucket" "static_website" {
   bucket = var.bucket_name
 
-  website {
-    index_document = var.index_document
-    error_document = var.error_document
-  }
-
   tags = var.tags
 }
 
@@ -15,6 +10,15 @@ resource "aws_s3_bucket_versioning" "static_website_versioning" {
   versioning_configuration {
     status = var.enable_versioning ? "Enabled" : "Suspended"
   }
+}
+
+resource "aws_s3_bucket_public_access_block" "static_website_public_access_block" {
+  bucket = aws_s3_bucket.static_website.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_policy" "static_website_policy" {
@@ -42,10 +46,10 @@ resource "aws_s3_bucket_policy" "static_website_policy" {
 }
 
 resource "aws_cloudfront_origin_access_control" "oac" {
-  name              = "${var.bucket_name}-oac"
+  name                              = "${var.bucket_name}-oac"
   origin_access_control_origin_type = "s3"
-  signing_behavior  = "always"
-  signing_protocol  = "sigv4"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
 resource "aws_cloudfront_distribution" "static_website" {
@@ -72,6 +76,14 @@ resource "aws_cloudfront_distribution" "static_website" {
         forward = "none"
       }
     }
+  }
+
+  default_root_object = "index.html" # This handles the index document at CloudFront
+
+  custom_error_response {
+    error_code         = 404
+    response_page_path = "/error.html"
+    response_code      = 404
   }
 
   restrictions {
