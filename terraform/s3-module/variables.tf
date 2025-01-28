@@ -3,12 +3,6 @@ variable "bucket_name" {
   type        = string
 }
 
-variable "acl" {
-  description = "The ACL applied to the S3 bucket"
-  type        = string
-  default     = "public-read"
-}
-
 variable "force_destroy" {
   description = "Whether to force destroy the S3 bucket on deletion"
   type        = bool

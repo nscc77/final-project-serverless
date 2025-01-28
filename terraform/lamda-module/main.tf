@@ -106,7 +106,7 @@ resource "aws_api_gateway_method" "methods" {
 }
 
 resource "aws_api_gateway_integration" "lambda_integration" {
-  for_each = { for path, method in var.integration_methods : path => method }
+  for_each = var.integration_methods
 
   rest_api_id             = aws_api_gateway_rest_api.rest_api.id
   resource_id             = aws_api_gateway_resource.resources[each.key].id
@@ -114,11 +114,19 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.lambda.invoke_arn
+
+  depends_on = [
+    aws_api_gateway_method.methods
+  ]
 }
 
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
-  depends_on  = [aws_api_gateway_method.methods]
+
+  depends_on = [
+    aws_api_gateway_method.methods,
+    aws_api_gateway_integration.lambda_integration
+  ]
 }
 
 resource "aws_api_gateway_stage" "stage" {

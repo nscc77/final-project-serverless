@@ -120,7 +120,6 @@ module "static_website" {
   source = "../s3-module"
 
   bucket_name       = "serverless24b-redhat-dev-${var.AWS_ACCT_ID}"
-  acl               = "public-read"
   force_destroy     = true
   enable_versioning = true
   index_document    = "index.html"
