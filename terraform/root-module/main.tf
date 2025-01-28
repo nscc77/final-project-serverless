@@ -34,15 +34,15 @@ module "lamda-module" {
   }
 
   methods = {
-    "memo"   = ["GET", "POST", "OPTIONS"]
-    "delete" = ["POST", "OPTIONS"]
-    "public" = ["GET", "OPTIONS"]
-    "stats"  = ["GET", "OPTIONS"]
+    "memo"   = "GET"
+    "delete" = "POST"
+    "public" = "GET"
+    "stats"  = "GET"
   }
 
   integration_methods = {
-    "memo"   = ["POST"]
-    "delete" = ["POST"]
+    "memo"   = "POST"
+    "delete" = "POST"
   }
 
   api_resources = [
