@@ -18,7 +18,7 @@ module "dynamodb_table" {
 }
 
 module "lambda-module" {
-  source = "../lambda-module"
+  source = "../lamda-module"
 
   lambda_name        = "serverless24b-redhat-lambda"
   image_uri          = "${AWS_ACCT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${module.ecr_repository.repository_name}:latest"
