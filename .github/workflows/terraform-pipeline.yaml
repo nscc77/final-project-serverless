@@ -32,8 +32,8 @@ jobs:
       # 3. Set Terraform Environment Variables
       - name: Set Environment Variables
         run: |
-          echo "TF_VAR_acct_id=${{ secrets.ACCT_ID }}" >> $GITHUB_ENV
-          echo "TF_VAR_aws_region=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
+          echo "TF_VAR_AWS_ACCT_ID=${{ secrets.ACCT_ID }}" >> $GITHUB_ENV
+          echo "TF_VAR_AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
 
       # 4. Terraform Init, Validate, Plan, and Apply
       - name: Terraform Init, Validate, Plan, and Apply

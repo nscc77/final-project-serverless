@@ -17,7 +17,7 @@ module "dynamodb_table" {
   }
 }
 
-module "lambda-module" {
+module "lamda-module" {
   source = "../lamda-module"
 
   lambda_name        = "serverless24b-redhat-lambda"
@@ -46,13 +46,13 @@ module "lambda-module" {
   }
 
   api_resources = [
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda.id}/dev/GET/memo",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda.id}/dev/OPTIONS/memo",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda.id}/dev/POST/memo",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda.id}/dev/OPTIONS/memo/delete",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda.id}/dev/POST/memo/delete",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda.id}/dev/GET/public/stats",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda.id}/dev/OPTIONS/public/stats"
+    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/memo",
+    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo",
+    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo",
+    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo/delete",
+    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo/delete",
+    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/public/stats",
+    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/public/stats"
   ]
 
   allowed_referers = [
