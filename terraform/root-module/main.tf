@@ -21,9 +21,9 @@ module "lamda-module" {
   source = "../lamda-module"
 
   lambda_name        = "serverless24b-redhat-lambda"
-  image_uri          = "${AWS_ACCT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${module.ecr_repository.repository_name}:latest"
-  region             = "${AWS_REGION}"
-  account_id         = "${AWS_ACCT_ID}"
+  image_uri          = "${var.AWS_ACCT_ID}.dkr.ecr.${var.AWS_REGION}.amazonaws.com/${module.ecr_repository.repository_name}:latest"
+  region             = "${var.AWS_REGION}"
+  account_id         = "${var.AWS_ACCT_ID}"
   dynamodb_table_arn = module.dynamodb_table.table_arn
 
   paths = {
@@ -46,13 +46,13 @@ module "lamda-module" {
   }
 
   api_resources = [
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/memo",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo/delete",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo/delete",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/public/stats",
-    "arn:aws:execute-api:${AWS_REGION}:${AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/public/stats"
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/memo",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo/delete",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo/delete",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/public/stats",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/public/stats"
   ]
 
   allowed_referers = [
@@ -119,7 +119,7 @@ EOT
 module "static_website" {
   source = "../s3-module"
 
-  bucket_name       = "serverless24b-redhat-dev-${AWS_ACCT_ID}"
+  bucket_name       = "serverless24b-redhat-dev-${var.AWS_ACCT_ID}"
   acl               = "public-read"
   force_destroy     = true
   enable_versioning = true
