@@ -26,7 +26,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
       # 3. Set Terraform Environment Variables
