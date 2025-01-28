@@ -8,10 +8,10 @@ terraform {
     
 
   backend "s3" {
-    bucket = "terraform-state-nscc77"
-    key    = "express-app.tfstate"
+    bucket = "serverless24b-redhat-statefile-bucket"
+    key    = "memo-app.tfstate"
     region = "us-east-1"
-    dynamodb_table = "terraform-lock-table"
+    dynamodb_table = "serverless24b-redhat-dev-terraform-lock"
   }
 }
 

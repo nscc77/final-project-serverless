@@ -2,6 +2,8 @@ name: Deploy Terraform
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'terraform/**'
   workflow_dispatch:
@@ -15,20 +17,27 @@ jobs:
     runs-on: ubuntu-22.04
     environment: dev  
     steps:
+      # 1. Clone the repository
       - name: Clone Repo
         uses: actions/checkout@v3
       
+      # 2. Configure AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.IAM_ROLE }}
+          role-to-assume: ${{ secrets.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      - name: Terraform Init and Apply
+      # 3. Set Terraform Environment Variables
+      - name: Set Environment Variables
+        run: |
+          echo "TF_VAR_acct_id=${{ secrets.ACCT_ID }}" >> $GITHUB_ENV
+          echo "TF_VAR_aws_region=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
+
+      # 4. Terraform Init, Validate, Plan, and Apply
+      - name: Terraform Init, Validate, Plan, and Apply
         working-directory: ./terraform/root-module
-        env:
-          TF_VAR_IAM_USER: ${{vars.IAM_USER}}
         run: |
           terraform init
           terraform validate

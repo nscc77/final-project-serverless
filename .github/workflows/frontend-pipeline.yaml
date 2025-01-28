@@ -2,6 +2,8 @@ name: Deploy Frontend
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'frontend/**'
   workflow_dispatch:
@@ -24,33 +26,54 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.IAM_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      # 3. Set up Node.js
+      # 3. Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      # 4. Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform/root-module
+
+      # 5. Extract Terraform Outputs
+      - name: Get Terraform Outputs
+        id: tf_outputs
+        run: |
+          echo "TF_BUCKET_NAME=$(terraform output -raw frontend_bucket_name)" >> $GITHUB_ENV
+          echo "TF_BUCKET_REGION=$(terraform output -raw frontend_bucket_region)" >> $GITHUB_ENV
+        working-directory: ./terraform/root-module
+
+      # 6. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 4. Install Dependencies
+      # 7. Install Dependencies
       - name: Install Dependencies
         working-directory: ./frontend
         run: npm ci
 
-      # 5. Build App
+      # 8. Build App
       - name: Build App
         working-directory: ./frontend
         env:
           VITE_BACKEND_API_URL: ${{ vars.VITE_BACKEND_API_URL }}
           VITE_USER_POOL_ID: ${{ vars.VITE_USER_POOL_ID }}
           VITE_USER_POOL_CLIENT_ID: ${{ vars.VITE_USER_POOL_CLIENT_ID }}
-          VITE_AWS_REGION: ${{ vars.AWS_REGION }}
+          VITE_AWS_REGION: ${{ secrets.AWS_REGION }}
         run: npm run build
 
-      # 6. Deploy to S3
+      # 9. Deploy to S3
       - name: Deploy to S3
         working-directory: ./frontend
         run: |
-          aws s3 sync dist/ s3://spectrex.click --delete
+          aws s3 sync dist/ s3://$TF_BUCKET_NAME --delete
+        env:
+          AWS_REGION: ${{ env.TF_BUCKET_REGION }}
