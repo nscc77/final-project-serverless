@@ -46,13 +46,13 @@ module "lamda-module" {
   }
 
   api_resources = [
-    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/memo",
-    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo",
-    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo",
-    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/memo/delete",
-    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/POST/memo/delete",
-    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/GET/public/stats",
-    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${aws_lamda_function.lamda-module.id}/dev/OPTIONS/public/stats"
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${module.lambda-module.lambda_id}/dev/GET/memo",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${module.lambda-module.lambda_id}/dev/OPTIONS/memo",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${module.lambda-module.lambda_id}/dev/POST/memo",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${module.lambda-module.lambda_id}/dev/OPTIONS/memo/delete",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${module.lambda-module.lambda_id}/dev/POST/memo/delete",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${module.lambda-module.lambda_id}/dev/GET/public/stats",
+    "arn:aws:execute-api:${var.AWS_REGION}:${var.AWS_ACCT_ID}:${module.lambda-module.lambda_id}/dev/OPTIONS/public/stats"
   ]
 
   allowed_referers = [
