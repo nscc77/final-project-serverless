@@ -26,8 +26,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: ${{ secrets.IAM_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
       # 3. Set up Terraform
@@ -74,6 +74,4 @@ jobs:
       - name: Deploy to S3
         working-directory: ./frontend
         run: |
-          aws s3 sync dist/ s3://$TF_BUCKET_NAME --delete
-        env:
-          AWS_REGION: ${{ env.TF_BUCKET_REGION }}
+          aws s3 sync dist/ s3:spectrex.click --delete
