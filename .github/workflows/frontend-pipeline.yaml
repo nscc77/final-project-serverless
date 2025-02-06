@@ -30,25 +30,6 @@ jobs:
           role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      # 3. Set up Terraform
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_wrapper: false
-
-      # 4. Initialize Terraform
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./terraform/root-module
-
-      # 5. Extract Terraform Outputs
-      - name: Get Terraform Outputs
-        id: tf_outputs
-        run: |
-          echo "TF_BUCKET_NAME=$(terraform output -raw frontend_bucket_name)" >> $GITHUB_ENV
-          echo "TF_BUCKET_REGION=$(terraform output -raw frontend_bucket_region)" >> $GITHUB_ENV
-        working-directory: ./terraform/root-module
-
       # 6. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
