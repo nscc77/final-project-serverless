@@ -1,18 +1,34 @@
-import { Grid, Stack, Typography } from '@mui/material';
-import { API } from 'aws-amplify';
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import { Stack, Typography, Grid, CircularProgress, Alert } from '@mui/material';
 
 const Stats: FC = () => {
+  const [stats, setStats] = useState<{ memoCount: number }>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const getStats = async () => {
     try {
       const res = await API.get('public', '/stats', {});
       setStats(res);
-    } catch (e) {}
+    } catch (e) {
+      setError('Failed to fetch stats. Please try again later.');
+      console.error('Error fetching stats:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   useEffect(() => {
     getStats();
   }, []);
-  const [stats, setStats] = useState<{ memoCount: number }>();
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
 
   return (
     <>
@@ -34,16 +50,6 @@ const Stats: FC = () => {
                 </Typography>
               </Stack>
             </Grid>
-            {/* <Grid item>
-              <Stack alignItems="center" justifyContent="center">
-                <Typography variant="h2" component="div" gutterBottom>
-                  {stats.jobCount}
-                </Typography>
-                <Typography variant="h5" component="div" gutterBottom>
-                  jobs executed
-                </Typography>
-              </Stack>
-            </Grid> */}
           </Grid>
         </Stack>
       )}
