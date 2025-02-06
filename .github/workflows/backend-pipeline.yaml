@@ -30,31 +30,28 @@ jobs:
           role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      # 3. Set up Node.js
+      # 3. Set up Node.js (Fix cache path)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: npm
+          cache-dependency-path: backend/package-lock.json  # Fix the lock file path
 
-      # 4. Move to the backend directory
-      - name: Change Directory to Backend
-        run: cd backend
-
-      # 5. Install Dev Dependencies (Build Stage)
-      - name: Install Dependencies (Build Stage)
+      # 4. Install Dependencies (Build Stage)
+      - name: Install Dependencies
         run: |
           cd backend
           npm ci
 
-      # 6. Run Build
+      # 5. Run Build
       - name: Run Build
         run: |
           cd backend
           npm run bundle
 
-      # 7. Install Only Production Dependencies (Final Stage)
-      - name: Prepare Lambda Package
+      # 6. Prepare Lambda Package
+      - name: Package Lambda for Deployment
         run: |
           export LAMBDA_TASK_ROOT="/var/task"
           mkdir -p $LAMBDA_TASK_ROOT
@@ -64,7 +61,7 @@ jobs:
           zip -r ../lambda.zip .
           cd ..
 
-      # 8. Upload to S3
+      # 7. Upload to S3
       - name: Upload to S3
         run: |
           aws s3 cp lambda.zip s3://test-dev-nscc77-redhat-bucket-test2/lambda.zip
