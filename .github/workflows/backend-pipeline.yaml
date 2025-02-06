@@ -50,23 +50,25 @@ jobs:
           cd backend
           npm run bundle
 
-      # 6. Prepare Lambda Package (Fix LAMBDA_TASK_ROOT issue)
+      # 6. Prepare Lambda Package (Ensure files are at root level)
       - name: Package Lambda for Deployment
         run: |
-          export LAMBDA_TASK_ROOT="./lambda_package"  # Use a writable directory instead
+          export LAMBDA_TASK_ROOT="./lambda_package"
           mkdir -p $LAMBDA_TASK_ROOT
           
-          # Move dist files to the root of lambda package
-          cp -r backend/dist/* $LAMBDA_TASK_ROOT/  # Move only contents of dist
+          # Move dist files to lambda_package root
+          cp -r backend/dist/* $LAMBDA_TASK_ROOT/
           
-          # Copy package files for dependency installation
+          # Copy package.json and package-lock.json
           cp backend/package.json backend/package-lock.json $LAMBDA_TASK_ROOT/
           
+          # Change directory to lambda_package before installing dependencies
           cd $LAMBDA_TASK_ROOT
           npm ci --production  # Install only production dependencies
-          
-          cd ..
-          zip -r lambda.zip lambda_package/*
+
+          # Zip the contents directly, avoiding the folder structure issue
+          zip -r ../lambda.zip .
+
       # 7. Upload to S3
       - name: Upload to S3
         run: |
