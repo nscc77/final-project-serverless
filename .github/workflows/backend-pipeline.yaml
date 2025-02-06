@@ -50,10 +50,10 @@ jobs:
           cd backend
           npm run bundle
 
-      # 6. Prepare Lambda Package
+      # 6. Prepare Lambda Package (Fix LAMBDA_TASK_ROOT issue)
       - name: Package Lambda for Deployment
         run: |
-          export LAMBDA_TASK_ROOT="/var/task"
+          export LAMBDA_TASK_ROOT="./lambda_package"  # Use a writable directory instead
           mkdir -p $LAMBDA_TASK_ROOT
           cp -r backend/dist backend/package.json backend/package-lock.json $LAMBDA_TASK_ROOT/
           cd $LAMBDA_TASK_ROOT
