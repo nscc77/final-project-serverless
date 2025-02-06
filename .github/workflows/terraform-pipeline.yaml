@@ -1,45 +1,45 @@
-name: Deploy Terraform
+# name: Deploy Terraform
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'terraform/**'
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'terraform/**'
+#   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
+# permissions:
+#   id-token: write
+#   contents: read
 
-jobs:
-  terraform-deploy:
-    runs-on: ubuntu-22.04
-    environment: dev  
-    steps:
-      # 1. Clone the repository
-      - name: Clone Repo
-        uses: actions/checkout@v3
+# jobs:
+#   terraform-deploy:
+#     runs-on: ubuntu-22.04
+#     environment: dev  
+#     steps:
+#       # 1. Clone the repository
+#       - name: Clone Repo
+#         uses: actions/checkout@v3
       
-      # 2. Configure AWS Credentials
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.IAM_ROLE }}
-          role-session-name: "${{ github.actor }}-${{ github.run_id }}"
+#       # 2. Configure AWS Credentials
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-region: ${{ vars.AWS_REGION }}
+#           role-to-assume: ${{ vars.IAM_ROLE }}
+#           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      # 3. Set Terraform Environment Variables
-      - name: Set Environment Variables
-        run: |
-          echo "TF_VAR_AWS_ACCT_ID=${{ secrets.ACCT_ID }}" >> $GITHUB_ENV
-          echo "TF_VAR_AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
+#       # 3. Set Terraform Environment Variables
+#       - name: Set Environment Variables
+#         run: |
+#           echo "TF_VAR_AWS_ACCT_ID=${{ secrets.ACCT_ID }}" >> $GITHUB_ENV
+#           echo "TF_VAR_AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
 
-      # 4. Terraform Init, Validate, Plan, and Apply
-      - name: Terraform Init, Validate, Plan, and Apply
-        working-directory: ./terraform/root-module
-        run: |
-          terraform init
-          terraform validate
-          terraform plan -out=tfplan -input=false
-          terraform apply -auto-approve tfplan
+#       # 4. Terraform Init, Validate, Plan, and Apply
+#       - name: Terraform Init, Validate, Plan, and Apply
+#         working-directory: ./terraform/root-module
+#         run: |
+#           terraform init
+#           terraform validate
+#           terraform plan -out=tfplan -input=false
+#           terraform apply -auto-approve tfplan
