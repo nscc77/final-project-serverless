@@ -55,12 +55,18 @@ jobs:
         run: |
           export LAMBDA_TASK_ROOT="./lambda_package"  # Use a writable directory instead
           mkdir -p $LAMBDA_TASK_ROOT
-          cp -r backend/dist backend/package.json backend/package-lock.json $LAMBDA_TASK_ROOT/
+          
+          # Move dist files to the root of lambda package
+          cp -r backend/dist/* $LAMBDA_TASK_ROOT/  # Move only contents of dist
+          
+          # Copy package files for dependency installation
+          cp backend/package.json backend/package-lock.json $LAMBDA_TASK_ROOT/
+          
           cd $LAMBDA_TASK_ROOT
-          npm ci --production
-          zip -r ../lambda.zip .
+          npm ci --production  # Install only production dependencies
+          
           cd ..
-
+          zip -r lambda.zip lambda_package/*
       # 7. Upload to S3
       - name: Upload to S3
         run: |
