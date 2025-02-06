@@ -19,7 +19,7 @@ jobs:
     
     steps:
       # 1. Clone Repo
-      - name: Clone repo
+      - name: Clone Repository
         uses: actions/checkout@v4
 
       # 2. Configure AWS Credentials
@@ -30,46 +30,32 @@ jobs:
           role-to-assume: ${{ vars.IAM_ROLE }}
           role-session-name: "${{ github.actor }}-${{ github.run_id }}"
 
-      # 3. Set up Node.js (Fix cache path)
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: npm
-          cache-dependency-path: backend/package-lock.json  # Fix the lock file path
-
-      # 4. Install Dependencies (Build Stage)
-      - name: Install Dependencies
+      # 3. Build the Docker Image
+      - name: Build Docker Image
+        working-directory: ./backend
         run: |
-          cd backend
-          npm ci
+          docker build -t lambda-backend .
 
-      # 5. Run Build
-      - name: Run Build
+      # 4. Extract Lambda Package from Docker Image
+      - name: Extract Lambda Files
+        working-directory: ./backend
         run: |
-          cd backend
-          npm run bundle
+          # Create a temporary container
+          CONTAINER_ID=$(docker create lambda-backend)
 
-      # 6. Prepare Lambda Package (Ensure files are at root level)
-      - name: Package Lambda for Deployment
+          # Copy files from the container to the host machine
+          docker cp $CONTAINER_ID:/var/task lambda_package
+
+          # Remove the temporary container
+          docker rm $CONTAINER_ID
+
+      # 5. Create ZIP File for AWS Lambda
+      - name: Create Lambda ZIP
+        working-directory: ./backend/lambda_package
         run: |
-          export LAMBDA_TASK_ROOT="./lambda_package"
-          mkdir -p $LAMBDA_TASK_ROOT
-          
-          # Move dist files to lambda_package root
-          cp -r backend/dist/* $LAMBDA_TASK_ROOT/
-          
-          # Copy package.json and package-lock.json
-          cp backend/package.json backend/package-lock.json $LAMBDA_TASK_ROOT/
-          
-          # Change directory to lambda_package before installing dependencies
-          cd $LAMBDA_TASK_ROOT
-          npm ci --production  # Install only production dependencies
-
-          # Zip the contents directly, avoiding the folder structure issue
           zip -r ../lambda.zip .
 
-      # 7. Upload to S3
+      # 6. Upload ZIP to S3 for Lambda Deployment
       - name: Upload to S3
         run: |
-          aws s3 cp lambda.zip s3://test-dev-nscc77-redhat-bucket-test2/lambda.zip
+          aws s3 cp backend/lambda.zip s3://test-dev-nscc77-redhat-bucket-test2/lambda.zip
